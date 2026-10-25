@@ -1,0 +1,6 @@
+{
+  "name": "VibraPay",
+  "description": "Full Online Cloud E-Wallet System with Atomic Cloud Transactions, Live Recipient Quadruple-Name Lookup, Email OTP Verification, Android Keystore Hardware Security, SQLCipher 256-bit Database Encryption, BiometricPrompt Authorization, and R8 Obfuscation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

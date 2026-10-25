@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">VibraPay</string>
+    <string name="app_subtitle">المحفظة الإلكترونية السحابية الرسمية المشفرة (Full Online Cloud E-Wallet • Keystore &amp; SQLCipher)</string>
+    <string name="mode_audible">الوضع المسموع (Audible)</string>
+    <string name="mode_ultrasonic">الوضع الخفي (Ultrasonic)</string>
+    <string name="tab_transceiver">الرادار والإرسال</string>
+    <string name="tab_history">سجل العمليات</string>
+    <string name="tab_protocol">دليل البروتوكول والاختبار</string>
+    <string name="btn_start_listening">بدء الاستماع</string>
+    <string name="btn_stop_listening">إيقاف الاستماع</string>
+    <string name="btn_transmit">بث عبر الموجات الصوتية</string>
+    <string name="btn_stop_transmit">إيقاف البث</string>
+    <string name="status_idle">الرادار في وضع الاستعداد</string>
+    <string name="status_listening">جاري مسح الطيف الترددي بانتظار نغمة البدء...</string>
+    <string name="status_receiving">جاري استلام البيانات...</string>
+    <string name="status_transmitting">جاري بث الحزمة الصوتية (MFSK-18)...</string>
+    <string name="template_free_text">إرسال نص حر</string>
+    <string name="template_invoice">فاتورة سريعة</string>
+    <string name="template_contact">كرت تواصل</string>
+    <string name="threshold_label">حساسية الالتقاط (Threshold)</string>
+    <string name="checksum_valid">تم التحقق من سلامة البيانات (Checksum مطابق)</string>
+    <string name="checksum_invalid">تحذير: خطأ في قيمة التحقق (Checksum غير مطابق)</string>
+    <string name="mic_permission_required">يتطلب التطبيق صلاحية الميكروفون لالتقاط الموجات الصوتية وفوق الصوتية وفك تشفيرها.</string>
+    <string name="grant_permission">منح صلاحية الميكروفون</string>
+</resources>

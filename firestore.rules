@@ -1,0 +1,251 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Default-Deny Safety Net (Pillar 1 / Phase 4)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Core Primitives
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidNumericAccountId(id) {
+      return id is string && id.size() >= 5 && id.size() <= 15 && id.matches('^[0-9]+$');
+    }
+
+    function isValidPhoneDigits(digits) {
+      return digits is string && digits.size() >= 5 && digits.size() <= 20 && digits.matches('^[0-9]+$');
+    }
+
+    function isNumberVal(val) {
+      return val is int || val is float;
+    }
+
+    // 1. Validation Blueprint: UserPrivateProfile (/users/{userId}) - PII Isolated to Owner
+    function isValidUserPrivateProfile(data) {
+      return data.keys().hasAll([
+               'userId', 'accountId', 'email', 'fullQuadName', 'emailOtpVerified', 'createdAt', 'updatedAt'
+             ]) &&
+             data.keys().hasOnly([
+               'userId', 'accountId', 'email', 'fullQuadName', 'emailOtpVerified', 'createdAt', 'updatedAt'
+             ]) &&
+             data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             isValidNumericAccountId(data.accountId) &&
+             data.email is string && data.email.size() >= 3 && data.email.size() <= 160 &&
+             data.fullQuadName is string && data.fullQuadName.size() >= 3 && data.fullQuadName.size() <= 220 &&
+             data.emailOtpVerified is bool &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    match /users/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && request.auth.uid == userId;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+                       isValidId(userId) &&
+                       request.auth.uid == userId &&
+                       incoming().userId == request.auth.uid &&
+                       isValidUserPrivateProfile(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(userId) &&
+                       request.auth.uid == userId &&
+                       isValidUserPrivateProfile(incoming()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'accountId', 'email', 'fullQuadName', 'emailOtpVerified', 'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() && isValidId(userId) && request.auth.uid == userId;
+    }
+
+    // 2. Validation Blueprint: CloudAccount (/cloud_accounts/{accountId})
+    function isValidCloudAccount(data) {
+      return data.keys().hasAll([
+               'accountId', 'ownerUid', 'firstName', 'fatherName', 'grandfatherName', 'familyName',
+               'fullQuadName', 'countryDialCode', 'countryNameAr', 'countryFlag',
+               'phoneNumberLocal', 'fullPhoneDigits',
+               'balanceYer', 'balanceSar', 'balanceUsd', 'createdAt', 'updatedAt'
+             ]) &&
+             data.keys().hasOnly([
+               'accountId', 'ownerUid', 'firstName', 'fatherName', 'grandfatherName', 'familyName',
+               'fullQuadName', 'countryDialCode', 'countryNameAr', 'countryFlag',
+               'phoneNumberLocal', 'fullPhoneDigits', 'email', 'passwordPlainOrHash',
+               'balanceYer', 'balanceSar', 'balanceUsd', 'createdAt', 'updatedAt'
+             ]) &&
+             isValidNumericAccountId(data.accountId) &&
+             data.ownerUid is string && data.ownerUid.size() >= 1 && data.ownerUid.size() <= 128 &&
+             data.firstName is string && data.firstName.size() >= 1 && data.firstName.size() <= 50 &&
+             data.fatherName is string && data.fatherName.size() >= 1 && data.fatherName.size() <= 50 &&
+             data.grandfatherName is string && data.grandfatherName.size() >= 1 && data.grandfatherName.size() <= 50 &&
+             data.familyName is string && data.familyName.size() >= 1 && data.familyName.size() <= 50 &&
+             data.fullQuadName is string && data.fullQuadName.size() >= 3 && data.fullQuadName.size() <= 220 &&
+             data.countryDialCode is string && data.countryDialCode.size() >= 1 && data.countryDialCode.size() <= 10 &&
+             data.countryNameAr is string && data.countryNameAr.size() >= 1 && data.countryNameAr.size() <= 60 &&
+             data.countryFlag is string && data.countryFlag.size() >= 1 && data.countryFlag.size() <= 20 &&
+             isValidPhoneDigits(data.phoneNumberLocal) &&
+             isValidPhoneDigits(data.fullPhoneDigits) &&
+             (!('email' in data) || (data.email is string && data.email.size() <= 160)) &&
+             (!('passwordPlainOrHash' in data) || (data.passwordPlainOrHash is string && data.passwordPlainOrHash.size() >= 1 && data.passwordPlainOrHash.size() <= 256)) &&
+             isNumberVal(data.balanceYer) && data.balanceYer >= 0 && data.balanceYer <= 1000000000 &&
+             isNumberVal(data.balanceSar) && data.balanceSar >= 0 && data.balanceSar <= 1000000000 &&
+             isNumberVal(data.balanceUsd) && data.balanceUsd >= 0 && data.balanceUsd <= 1000000000 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    match /cloud_accounts/{accountId} {
+      // Single-document and query lookup allowed for signed-in users to verify uniqueness (Name/Phone/Email) and recipient Quadruple Name
+      allow get, list: if isSignedIn();
+
+      allow create: if isSignedIn() &&
+                       isValidNumericAccountId(accountId) &&
+                       incoming().accountId == accountId &&
+                       incoming().ownerUid == request.auth.uid &&
+                       isValidCloudAccount(incoming());
+
+      // Action-Based Update Pattern:
+      // Branch A (Owner Profile/Password/Balance Update): Owner updates their own account fields, password, or balance
+      // Branch B (Atomic Peer Transfer Credit): Authenticated sender credits recipient's balance (balance can only increase, identity fields immutable)
+      allow update: if isSignedIn() &&
+                       isValidNumericAccountId(accountId) &&
+                       isValidCloudAccount(incoming()) &&
+                       incoming().accountId == existing().accountId &&
+                       incoming().ownerUid == existing().ownerUid &&
+                       incoming().createdAt == existing().createdAt &&
+                       (
+                         (
+                           existing().ownerUid == request.auth.uid &&
+                           incoming().diff(existing()).affectedKeys().hasOnly([
+                             'firstName', 'fatherName', 'grandfatherName', 'familyName', 'fullQuadName',
+                             'email', 'passwordPlainOrHash',
+                             'balanceYer', 'balanceSar', 'balanceUsd', 'updatedAt'
+                           ])
+                         ) ||
+                         (
+                           existing().ownerUid != request.auth.uid &&
+                           incoming().diff(existing()).affectedKeys().hasOnly([
+                             'balanceYer', 'balanceSar', 'balanceUsd', 'updatedAt'
+                           ]) &&
+                           incoming().balanceYer >= existing().balanceYer &&
+                           incoming().balanceSar >= existing().balanceSar &&
+                           incoming().balanceUsd >= existing().balanceUsd
+                         )
+                       );
+
+      allow delete: if false;
+    }
+
+    // 3. Validation Blueprint: PhoneDirectoryEntry (/phone_directory/{phoneDigits})
+    function isValidPhoneDirectoryEntry(data) {
+      return data.keys().hasAll([
+               'phoneDigits', 'accountId', 'ownerUid', 'fullQuadName', 'createdAt', 'updatedAt'
+             ]) &&
+             data.keys().hasOnly([
+               'phoneDigits', 'accountId', 'ownerUid', 'fullQuadName', 'createdAt', 'updatedAt'
+             ]) &&
+             isValidPhoneDigits(data.phoneDigits) &&
+             isValidNumericAccountId(data.accountId) &&
+             data.ownerUid is string && data.ownerUid.size() >= 1 && data.ownerUid.size() <= 128 &&
+             data.fullQuadName is string && data.fullQuadName.size() >= 3 && data.fullQuadName.size() <= 220 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    match /phone_directory/{phoneDigits} {
+      // Single-document and list lookup by phone digits is allowed for signed-in users to resolve recipient Account ID & Quadruple Name
+      allow get, list: if isSignedIn();
+
+      allow create: if isSignedIn() &&
+                       isValidPhoneDigits(phoneDigits) &&
+                       incoming().phoneDigits == phoneDigits &&
+                       incoming().ownerUid == request.auth.uid &&
+                       isValidPhoneDirectoryEntry(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidPhoneDigits(phoneDigits) &&
+                       isValidPhoneDirectoryEntry(incoming()) &&
+                       existing().ownerUid == request.auth.uid &&
+                       incoming().phoneDigits == existing().phoneDigits &&
+                       incoming().ownerUid == existing().ownerUid &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'accountId', 'fullQuadName', 'updatedAt'
+                       ]);
+
+      allow delete: if false;
+    }
+
+    // 4. Validation Blueprint: CloudTransfer (/cloud_transfers/{transferId})
+    function isValidCloudTransfer(data) {
+      return data.keys().hasAll([
+               'transferId', 'ottId', 'senderUid', 'senderAccountId', 'senderQuadName',
+               'recipientUid', 'recipientAccountId', 'recipientQuadName',
+               'amount', 'currency', 'syncChannel', 'status',
+               'participantUids', 'participantAccountIds', 'createdAt'
+             ]) &&
+             data.keys().hasOnly([
+               'transferId', 'ottId', 'senderUid', 'senderAccountId', 'senderQuadName',
+               'recipientUid', 'recipientAccountId', 'recipientQuadName',
+               'amount', 'currency', 'syncChannel', 'status',
+               'participantUids', 'participantAccountIds', 'createdAt'
+             ]) &&
+             isValidId(data.transferId) &&
+             data.ottId is string && data.ottId.size() >= 3 && data.ottId.size() <= 40 &&
+             data.senderUid is string && data.senderUid.size() >= 1 && data.senderUid.size() <= 128 &&
+             isValidNumericAccountId(data.senderAccountId) &&
+             data.senderQuadName is string && data.senderQuadName.size() >= 3 && data.senderQuadName.size() <= 220 &&
+             data.recipientUid is string && data.recipientUid.size() >= 1 && data.recipientUid.size() <= 128 &&
+             isValidNumericAccountId(data.recipientAccountId) &&
+             data.recipientQuadName is string && data.recipientQuadName.size() >= 3 && data.recipientQuadName.size() <= 220 &&
+             isNumberVal(data.amount) && data.amount > 0 && data.amount <= 100000000 &&
+             data.currency in ['YER', 'SAR', 'USD'] &&
+             data.syncChannel in ['ONLINE_CLOUD', 'HYBRID_SYNCED_ULTRASONIC'] &&
+             data.status == 'COMPLETED' &&
+             data.participantUids is list && data.participantUids.size() >= 1 && data.participantUids.size() <= 2 &&
+             data.participantUids[0] is string && data.participantUids[0].size() <= 128 &&
+             data.participantAccountIds is list && data.participantAccountIds.size() >= 1 && data.participantAccountIds.size() <= 2 &&
+             data.participantAccountIds[0] is string && data.participantAccountIds[0].size() <= 15 &&
+             data.createdAt is timestamp && data.createdAt <= request.time;
+    }
+
+    match /cloud_transfers/{transferId} {
+      allow get: if isSignedIn() &&
+                    isValidId(transferId) &&
+                    (resource.data.senderUid == request.auth.uid ||
+                     resource.data.recipientUid == request.auth.uid ||
+                     request.auth.uid in resource.data.participantUids);
+
+      allow list: if isSignedIn() &&
+                     request.auth.uid in resource.data.participantUids;
+
+      allow create: if isSignedIn() &&
+                       isValidId(transferId) &&
+                       incoming().transferId == transferId &&
+                       incoming().senderUid == request.auth.uid &&
+                       request.auth.uid in incoming().participantUids &&
+                       isValidCloudTransfer(incoming());
+
+      // Immutable financial transfer ledger (Terminal state COMPLETED cannot be mutated or deleted)
+      allow update, delete: if false;
+    }
+  }
+}

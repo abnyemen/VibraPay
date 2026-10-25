@@ -1,0 +1,294 @@
+{
+  "entities": {
+    "UserPrivateProfile": {
+      "title": "UserPrivateProfile",
+      "description": "Private user profile storing PII (email and verified status) isolated to the authenticated owner.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the owner."
+        },
+        "accountId": {
+          "type": "string",
+          "description": "Numeric 5+ digit official account ID linked to this user."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Verified email address of the account holder."
+        },
+        "fullQuadName": {
+          "type": "string",
+          "description": "Full quadruple name of the user."
+        },
+        "emailOtpVerified": {
+          "type": "boolean",
+          "description": "Whether the user's email OTP has been verified."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the profile was created (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the profile was last updated (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "accountId",
+        "email",
+        "fullQuadName",
+        "emailOtpVerified",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "CloudAccount": {
+      "title": "CloudAccount",
+      "description": "Official VibraPay cloud wallet account storing quadruple name, numeric accountId, international phone digits, and real-time multi-currency balances.",
+      "type": "object",
+      "properties": {
+        "accountId": {
+          "type": "string",
+          "description": "Unique 5+ digit numeric account ID."
+        },
+        "ownerUid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the user who owns or registered this account."
+        },
+        "firstName": {
+          "type": "string",
+          "description": "First name."
+        },
+        "fatherName": {
+          "type": "string",
+          "description": "Father name."
+        },
+        "grandfatherName": {
+          "type": "string",
+          "description": "Grandfather name."
+        },
+        "familyName": {
+          "type": "string",
+          "description": "Family/surname."
+        },
+        "fullQuadName": {
+          "type": "string",
+          "description": "Full 4-part official name."
+        },
+        "countryDialCode": {
+          "type": "string",
+          "description": "International country dial code (e.g., +967, +966)."
+        },
+        "countryNameAr": {
+          "type": "string",
+          "description": "Country Arabic name."
+        },
+        "countryFlag": {
+          "type": "string",
+          "description": "Country flag emoji."
+        },
+        "phoneNumberLocal": {
+          "type": "string",
+          "description": "Local digits-only phone number."
+        },
+        "fullPhoneDigits": {
+          "type": "string",
+          "description": "Full international digits-only phone number."
+        },
+        "balanceYer": {
+          "type": "number",
+          "description": "Current balance in Yemeni Rial (YER)."
+        },
+        "balanceSar": {
+          "type": "number",
+          "description": "Current balance in Saudi Riyal (SAR)."
+        },
+        "balanceUsd": {
+          "type": "number",
+          "description": "Current balance in US Dollar (USD)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of creation (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of last balance or profile update (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "accountId",
+        "ownerUid",
+        "firstName",
+        "fatherName",
+        "grandfatherName",
+        "familyName",
+        "fullQuadName",
+        "countryDialCode",
+        "countryNameAr",
+        "countryFlag",
+        "phoneNumberLocal",
+        "fullPhoneDigits",
+        "balanceYer",
+        "balanceSar",
+        "balanceUsd",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "PhoneDirectoryEntry": {
+      "title": "PhoneDirectoryEntry",
+      "description": "Maps a digits-only phone number to an official numeric accountId for instant recipient lookup.",
+      "type": "object",
+      "properties": {
+        "phoneDigits": {
+          "type": "string",
+          "description": "Digits-only phone key."
+        },
+        "accountId": {
+          "type": "string",
+          "description": "Target 5+ digit numeric accountId."
+        },
+        "ownerUid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the account owner."
+        },
+        "fullQuadName": {
+          "type": "string",
+          "description": "Recipient full quadruple name."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "phoneDigits",
+        "accountId",
+        "ownerUid",
+        "fullQuadName",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "CloudTransfer": {
+      "title": "CloudTransfer",
+      "description": "Immutable atomic online or hybrid-synced ultrasonic transfer record.",
+      "type": "object",
+      "properties": {
+        "transferId": {
+          "type": "string",
+          "description": "Unique transfer document ID."
+        },
+        "ottId": {
+          "type": "string",
+          "description": "Automated One-Time Transfer token ID."
+        },
+        "senderUid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the sender."
+        },
+        "senderAccountId": {
+          "type": "string",
+          "description": "5+ digit Account ID of the sender."
+        },
+        "senderQuadName": {
+          "type": "string",
+          "description": "Full quadruple name of the sender."
+        },
+        "recipientUid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the recipient."
+        },
+        "recipientAccountId": {
+          "type": "string",
+          "description": "5+ digit Account ID of the recipient."
+        },
+        "recipientQuadName": {
+          "type": "string",
+          "description": "Full quadruple name of the recipient."
+        },
+        "amount": {
+          "type": "number",
+          "description": "Transfer amount (> 0)."
+        },
+        "currency": {
+          "type": "string",
+          "enum": ["YER", "SAR", "USD"],
+          "description": "Currency code."
+        },
+        "syncChannel": {
+          "type": "string",
+          "enum": ["ONLINE_CLOUD", "HYBRID_SYNCED_ULTRASONIC"],
+          "description": "Whether executed directly online or synced from an offline ultrasonic transfer."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["COMPLETED"],
+          "description": "Terminal status of the atomic transfer."
+        },
+        "participantUids": {
+          "type": "array",
+          "description": "Bounded array (max 2) of Firebase Auth UIDs participating in this transfer."
+        },
+        "participantAccountIds": {
+          "type": "array",
+          "description": "Bounded array (max 2) of 5+ digit Account IDs participating in this transfer."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of the transfer (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "transferId",
+        "ottId",
+        "senderUid",
+        "senderAccountId",
+        "senderQuadName",
+        "recipientUid",
+        "recipientAccountId",
+        "recipientQuadName",
+        "amount",
+        "currency",
+        "syncChannel",
+        "status",
+        "participantUids",
+        "participantAccountIds",
+        "createdAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserPrivateProfile" },
+      "description": "Private PII profile per authenticated user."
+    },
+    "/cloud_accounts/{accountId}": {
+      "schema": { "$ref": "#/entities/CloudAccount" },
+      "description": "Official VibraPay cloud wallet accounts indexed by 5+ digit numeric accountId."
+    },
+    "/phone_directory/{phoneDigits}": {
+      "schema": { "$ref": "#/entities/PhoneDirectoryEntry" },
+      "description": "Phone number to Account ID directory for live recipient lookup."
+    },
+    "/cloud_transfers/{transferId}": {
+      "schema": { "$ref": "#/entities/CloudTransfer" },
+      "description": "Atomic online and hybrid-synced ultrasonic transfers."
+    }
+  }
+}

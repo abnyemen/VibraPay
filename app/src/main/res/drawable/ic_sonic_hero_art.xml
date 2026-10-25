@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="360dp"
+    android:height="120dp"
+    android:viewportWidth="360"
+    android:viewportHeight="120">
+    <path android:pathData="M0,0h360v120h-360z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="0"
+                android:startY="0"
+                android:endX="360"
+                android:endY="120"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#050A14" />
+                <item android:offset="0.5" android:color="#0A192F" />
+                <item android:offset="1.0" android:color="#042426" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <!-- Cyber Grid Lines -->
+    <path
+        android:pathData="M0,30L360,30M0,60L360,60M0,90L360,90M60,0L60,120M120,0L120,120M180,0L180,120M240,0L240,120M300,0L300,120"
+        android:strokeWidth="0.5"
+        android:strokeColor="#1400FF9D" />
+    <!-- Glowing Ultrasonic Wave Curves -->
+    <path
+        android:pathData="M0,60 Q45,10 90,60 T180,60 T270,60 T360,60"
+        android:strokeWidth="2.5"
+        android:strokeColor="#5500E5FF"
+        android:fillColor="#00000000" />
+    <path
+        android:pathData="M0,60 Q30,95 60,60 T120,60 T180,60 T240,60 T300,60 T360,60"
+        android:strokeWidth="2.0"
+        android:strokeColor="#8800FF9D"
+        android:fillColor="#00000000" />
+</vector>

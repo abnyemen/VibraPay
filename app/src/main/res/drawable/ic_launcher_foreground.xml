@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Outer Cyber Shield & Sonic Ring -->
+    <path
+        android:fillColor="#00FF9D"
+        android:pathData="M54,22L78,32V52C78,69.5 67.8,83.4 54,88C40.2,83.4 30,69.5 30,52V32L54,22ZM54,27.8L35,35.7V52C35,66.6 43.1,78.4 54,82.6C64.9,78.4 73,66.6 73,52V35.7L54,27.8Z" />
+    <!-- Ultrasonic Equalizer Bars inside Shield -->
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M41,47h4v14h-4zM47,40h4v28h-4zM53,34h4v40h-4zM59,42h4v24h-4zM65,48h4v12h-4z" />
+    <!-- Outer Acoustic Wave Arcs -->
+    <path
+        android:fillColor="#00FF9D"
+        android:pathData="M24,42h3v24h-3zM81,42h3v24h-3z" />
+</vector>
